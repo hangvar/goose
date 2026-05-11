@@ -1,4 +1,5 @@
 pub mod edit;
+pub mod goose_ignore;
 pub mod shell;
 pub mod tree;
 
@@ -142,7 +143,7 @@ impl DeveloperClient {
             )),
             Tool::new(
                 "tree".to_string(),
-                "List a directory tree with line counts. Traversal respects .gitignore rules.".to_string(),
+                "List a directory tree with line counts. Traversal respects .gitignore and .gooseignore rules.".to_string(),
                 Self::schema::<TreeParams>(),
             )
             .annotate(ToolAnnotations::from_raw(

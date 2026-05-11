@@ -7,6 +7,8 @@ use rmcp::model::{CallToolResult, Content};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
+use super::goose_ignore::GooseIgnore;
+
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct TreeParams {
     pub path: String,
@@ -151,6 +153,8 @@ impl DirectoryNode {
 }
 
 fn collect_tree(root: &Path, max_depth: Option<usize>) -> DirectoryNode {
+    let ignore = GooseIgnore::load(Some(root));
+
     let mut builder = WalkBuilder::new(root);
     builder.git_ignore(true);
     builder.git_exclude(true);
@@ -158,6 +162,7 @@ fn collect_tree(root: &Path, max_depth: Option<usize>) -> DirectoryNode {
     builder.require_git(false);
     builder.ignore(true);
     builder.hidden(true);
+    builder.filter_entry(move |entry| !ignore.is_read_ignored(entry.path()));
 
     if let Some(depth) = max_depth {
         builder.max_depth(Some(depth + 1));

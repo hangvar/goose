@@ -64,6 +64,14 @@ The [seatbelt sandbox profile](https://github.com/aaif-goose/goose/blob/main/ui/
 |----------|---------|-------------|
 | `GOOSE_SANDBOX_PROTECT_FILES` | `true` | Write-protect sensitive files listed above. Set to `false` to disable |
 
+#### `.gooseignore` integration
+
+When the sandbox is enabled, entries from your [`.gooseignore`](/docs/guides/using-gooseignore) files are also translated into seatbelt deny rules. Absolute-path entries (e.g. `~/notes/Private/`) become `(deny file-read*)` or `(deny file-write*)` rules enforced at the OS level. Glob-style patterns (e.g. `**/.env`) are enforced at the application layer only.
+
+:::warning Restart required
+The seatbelt profile is generated once when `goosed` starts. If you edit `.gooseignore` while the sandbox is active, **restart the client** to apply the updated OS-level rules. Application-layer rules pick up changes immediately without a restart.
+:::
+
 ----
 
 ### Direct Network Access

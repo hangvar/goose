@@ -11,6 +11,7 @@ import {
   createStartupDiagnostics,
   type StartupDiagnostics,
 } from './startupDiagnostics';
+import { buildGoosedSandboxSpawn } from './sandbox';
 
 export interface Logger {
   info: (...args: unknown[]) => void;
@@ -287,8 +288,11 @@ export const startGoosed = async (options: StartGoosedOptions): Promise<GoosedRe
     }
   }
 
-  const spawnCommand = goosedPath;
-  const spawnArgs = ['agent'];
+  const { command: spawnCommand, args: spawnArgs } = buildGoosedSandboxSpawn(
+    goosedPath,
+    ['agent'],
+    workingDir
+  );
 
   const isWindows = process.platform === 'win32';
   const spawnOptions = {
