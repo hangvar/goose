@@ -126,6 +126,16 @@ If you haven't created any `.gooseignore` files (neither global nor local), goos
 These default patterns are only active when **no** `.gooseignore` files exist. Once you create either a global or local `.gooseignore` file, you'll need to add these patterns yourself if you want to keep them.
 :::
 
+## When changes take effect
+
+Changes to `.gooseignore` are picked up **on the next tool call** — no client restart is needed. The developer extension reads your ignore files from disk each time it runs a `read`, `write`, `edit`, or `tree` operation, so edits take effect immediately.
+
+**Exception: `GOOSE_SANDBOX=true`**
+
+When the [macOS sandbox](/docs/guides/sandbox) is enabled, `.gooseignore` entries are also translated into OS-level seatbelt deny rules when `goosed` starts. Those rules are fixed for the lifetime of the process, so a **client restart is required** to apply any changes to the seatbelt profile.
+
+The application-layer rules (above) are still live even with the sandbox enabled — a restart is only needed for the OS-level enforcement to update.
+
 ## Common use cases
 
 Here are some typical scenarios where `.gooseignore` is helpful:

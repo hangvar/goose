@@ -5,6 +5,8 @@ use rmcp::model::{CallToolResult, Content};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
+use super::goose_ignore::GooseIgnore;
+
 const NO_MATCH_PREVIEW_LINES: usize = 20;
 
 #[derive(Debug, Deserialize, JsonSchema)]
@@ -45,6 +47,14 @@ impl EditTools {
     ) -> CallToolResult {
         let path = resolve_path(&params.path, working_dir);
 
+        if GooseIgnore::load(working_dir).is_read_ignored(&path) {
+            return CallToolResult::error(vec![Content::text(format!(
+                "Access to '{}' is restricted by .gooseignore",
+                params.path
+            ))
+            .with_priority(0.0)]);
+        }
+
         match fs::read_to_string(&path) {
             Ok(content) => {
                 let content = apply_line_limit(&content, params.line, params.limit);
@@ -68,6 +78,14 @@ impl EditTools {
         working_dir: Option<&Path>,
     ) -> CallToolResult {
         let path = resolve_path(&params.path, working_dir);
+
+        if GooseIgnore::load(working_dir).is_write_ignored(&path) {
+            return CallToolResult::error(vec![Content::text(format!(
+                "Access to '{}' is restricted by .gooseignore",
+                params.path
+            ))
+            .with_priority(0.0)]);
+        }
 
         if let Some(parent) = path.parent() {
             if !parent.as_os_str().is_empty() && !parent.exists() {
@@ -112,6 +130,15 @@ impl EditTools {
         working_dir: Option<&Path>,
     ) -> CallToolResult {
         let path = resolve_path(&params.path, working_dir);
+
+        let ignore = GooseIgnore::load(working_dir);
+        if ignore.is_read_ignored(&path) || ignore.is_write_ignored(&path) {
+            return CallToolResult::error(vec![Content::text(format!(
+                "Access to '{}' is restricted by .gooseignore",
+                params.path
+            ))
+            .with_priority(0.0)]);
+        }
 
         let content = match fs::read_to_string(&path) {
             Ok(c) => c,
