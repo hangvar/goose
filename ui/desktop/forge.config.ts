@@ -1,8 +1,12 @@
 const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 const { resolve } = require('path');
+const { productName } = require('./package.json');
+
+const appName = process.env.GOOSE_BUNDLE_NAME || productName;
 
 let cfg = {
+  name: appName,
   asar: true,
   extraResource: ['src/bin', 'src/images'],
   icon: 'src/images/icon',
