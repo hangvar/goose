@@ -164,20 +164,18 @@ debug-ui-main-process:
 
 # Package the desktop app locally for testing (macOS)
 # Applies ad-hoc code signing with entitlements (needed for mic access, etc.)
-package-ui:
-    @just release-binary
-    @echo "Packaging desktop app..."
-    cd ui/desktop && pnpm install && pnpm run package
+package-ui: release-binary
     #!/usr/bin/env sh
+    echo "Packaging desktop app..."
+    cd ui/desktop && pnpm install && pnpm run package
     APP_NAME="${GOOSE_BUNDLE_NAME:-$(node -e "process.stdout.write(require('./ui/desktop/package.json').productName)")}"
-    @echo "Signing with entitlements..."
+    echo "Signing with entitlements..."
     codesign --force --deep --sign - --entitlements ui/desktop/entitlements.plist "ui/desktop/out/${APP_NAME}-darwin-arm64/${APP_NAME}.app"
-    @echo "Done! Launch with: open \"ui/desktop/out/${APP_NAME}-darwin-arm64/${APP_NAME}.app\""
+    echo "Done! Launch with: open \"ui/desktop/out/${APP_NAME}-darwin-arm64/${APP_NAME}.app\""
 
 # Build, package, sign, and open the desktop app (macOS)
 # Use this instead of run-ui to get the correct app name in the dock.
-launch-ui:
-    @just package-ui
+launch-ui: package-ui
     #!/usr/bin/env sh
     APP_NAME="${GOOSE_BUNDLE_NAME:-$(node -e "process.stdout.write(require('./ui/desktop/package.json').productName)")}"
     open "ui/desktop/out/${APP_NAME}-darwin-arm64/${APP_NAME}.app"
