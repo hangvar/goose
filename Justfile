@@ -168,10 +168,10 @@ package-ui: release-binary
     #!/usr/bin/env sh
     echo "Packaging desktop app..."
     cd ui/desktop && pnpm install && pnpm run package
-    APP_NAME="${GOOSE_BUNDLE_NAME:-$(node -e "process.stdout.write(require('./ui/desktop/package.json').productName)")}"
+    APP_NAME="${GOOSE_BUNDLE_NAME:-$(node -e "process.stdout.write(require('./package.json').productName)")}"
     echo "Signing with entitlements..."
-    codesign --force --deep --sign - --entitlements ui/desktop/entitlements.plist "ui/desktop/out/${APP_NAME}-darwin-arm64/${APP_NAME}.app"
-    echo "Done! Launch with: open \"ui/desktop/out/${APP_NAME}-darwin-arm64/${APP_NAME}.app\""
+    codesign --force --deep --sign - --entitlements entitlements.plist "out/${APP_NAME}-darwin-arm64/${APP_NAME}.app"
+    echo "Done! Launch with: open \"$(pwd)/out/${APP_NAME}-darwin-arm64/${APP_NAME}.app\""
 
 # Build, package, sign, and open the desktop app (macOS)
 # Use this instead of run-ui to get the correct app name in the dock.
