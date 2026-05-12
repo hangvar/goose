@@ -264,6 +264,45 @@ mod tests {
         assert!(ignore.is_write_ignored(&file));
     }
 
+    // ── absolute path patterns ────────────────────────────────────────────────
+
+    #[test]
+    fn absolute_path_pattern_blocks_nonexistent_file() {
+        let dir = tempfile::tempdir().unwrap();
+        let blocked = dir.path().join("blocked");
+        fs::create_dir_all(&blocked).unwrap();
+
+        // Absolute path pattern with trailing slash (like /Users/alice/Private/)
+        let pattern = format!("{}/", dir.path().display());
+        write_ignore(&dir, &pattern);
+
+        // File that does not exist yet inside the blocked directory
+        let new_file = blocked.join("new.txt");
+        assert!(!new_file.exists());
+
+        let ignore = GooseIgnore::load(Some(dir.path()));
+        assert!(ignore.is_write_ignored(&new_file), "write to non-existent file inside blocked dir should be denied");
+        assert!(ignore.is_read_ignored(&new_file), "read of non-existent file inside blocked dir should be denied");
+    }
+
+    #[test]
+    fn absolute_path_pattern_allows_sibling_directory() {
+        let dir = tempfile::tempdir().unwrap();
+        let blocked = dir.path().join("blocked");
+        let allowed = dir.path().join("allowed");
+        fs::create_dir_all(&blocked).unwrap();
+        fs::create_dir_all(&allowed).unwrap();
+
+        let pattern = format!("{}/", blocked.display());
+        write_ignore(&dir, &pattern);
+
+        let file_in_allowed = allowed.join("readme.txt");
+        fs::write(&file_in_allowed, "ok").unwrap();
+
+        let ignore = GooseIgnore::load(Some(dir.path()));
+        assert!(!ignore.is_write_ignored(&file_in_allowed), "sibling directory should not be blocked");
+    }
+
     // ── mixed rules ───────────────────────────────────────────────────────────
 
     #[test]
