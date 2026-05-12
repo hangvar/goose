@@ -42,7 +42,11 @@ pub struct GooseIgnore {
 impl GooseIgnore {
     pub fn load(working_dir: Option<&Path>) -> Self {
         let home = dirs::home_dir().unwrap_or_else(|| PathBuf::from("/"));
-        let global_path = dirs::config_dir().map(|d| d.join("goose").join(".gooseignore"));
+        // Use ~/.config/goose/.gooseignore on all platforms, consistent with
+        // the documented path and the XDG convention used elsewhere in goose.
+        // dirs::config_dir() returns ~/Library/Application Support on macOS,
+        // which is wrong for this file.
+        let global_path = Some(home.join(".config").join("goose").join(".gooseignore"));
         let local_path = working_dir.map(|d| d.join(".gooseignore"));
 
         let has_global = global_path.as_ref().is_some_and(|p| p.exists());
